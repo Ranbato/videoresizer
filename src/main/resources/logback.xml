@@ -3,9 +3,55 @@
 To change this license header, choose License Headers in Project Properties.
 To change this template file, choose Tools | Templates
 and open the template in the editor.
+http://logback.qos.ch/manual/filters.html
+http://blog.takipi.com/how-to-instantly-improve-your-java-logging-with-7-logback-tweaks/
 -->
 
+<configuration>
 
-<root>
-    
-</root>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <pattern>%d %-5level %logger{0}: %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>videoresizer.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d %-5level %logger{0}: %msg%n</pattern>
+            <!-- this quadruples logging throughput -->
+            <immediateFlush>false</immediateFlush>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>archived/videoresizer.%d{yyyy-MM-dd}.%i.log
+            </fileNamePattern>
+            <!--<timeBasedFileNamingAndTriggeringPolicy-->
+                    <!--class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">-->
+                <!--<maxFileSize>10MB</maxFileSize>-->
+            <!--</timeBasedFileNamingAndTriggeringPolicy>-->
+        </rollingPolicy>
+
+    </appender>
+    <appender name="ASYNC500" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>500</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="FILE" />
+    </appender>
+    <!--&lt;!&ndash; Send logs to both console and file audit &ndash;&gt;-->
+    <!--<logger name="info.logger" level="INFO"-->
+            <!--additivity="true">-->
+        <!--<appender-ref ref="FILE" />-->
+        <!--&lt;!&ndash;<appender-ref ref="STDOUT" />&ndash;&gt;-->
+    <!--</logger>-->
+    <root level="debug">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="ASYNC500" />
+    </root>
+</configuration>

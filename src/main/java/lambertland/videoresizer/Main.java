@@ -31,13 +31,12 @@ public class Main extends SimpleFileVisitor<Path> {
     public FileVisitResult visitFile(Path file,
                                    BasicFileAttributes attr) {
         if (attr.isSymbolicLink()) {
-            logger.info("Symbolic link: {} ", file);
+            logger.info("Symbolic link: {} ({} bytes)", file, attr.size());
         } else if (attr.isRegularFile()) {
-            logger.info("Regular file: {} ", file);
+            logger.info("Regular file: {} ({} bytes)", file, attr.size());
         } else {
-            logger.info("Other: {} ", file);
+            logger.info("Other: {} ({} bytes)", file, attr.size());
         }
-        logger.info("(" + attr.size() + "bytes)");
         return CONTINUE;
     }
 
@@ -69,7 +68,7 @@ public class Main extends SimpleFileVisitor<Path> {
         Main main = new Main();
         try {
             // TODO code application logic here
-            Files.walkFileTree(Paths.get("d:\\Videos"), main); //@todo make command line parameter
+            Files.walkFileTree(Paths.get("\\\\master-htpc\\Videos\\Video"), main); //@todo make command line parameter
         } catch (IOException ex) {
             logger.error("Critical Error {}", ex);
         }
