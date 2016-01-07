@@ -6,6 +6,9 @@
 package lambertland.videoresizer;
 
 // Only ever import slf4j Logging APIs
+import com.xuggle.mediatool.IMediaReader;
+import com.xuggle.mediatool.ToolFactory;
+import com.xuggle.xuggler.IContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +36,17 @@ public class Main extends SimpleFileVisitor<Path> {
         if (attr.isSymbolicLink()) {
             logger.info("Symbolic link: {} ({} bytes)", file, attr.size());
         } else if (attr.isRegularFile()) {
-            logger.info("Regular file: {} ({} bytes)", file, attr.size());
+            IContainer video = IContainer.make();
+            long length;
+            int result = video.open(file.toString(), IContainer.Type.READ,null);
+            if(result < 0){
+                length = -1;
+            } else {
+                length = video.getDuration()/60;
+            }
+
+            logger.info("Regular file: {} ({} bytes) {} minutes", file, attr.size(),length);
+
         } else {
             logger.info("Other: {} ({} bytes)", file, attr.size());
         }
