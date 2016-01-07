@@ -18,6 +18,15 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
+
+// Video file reader library
+//TODO add to dependency list
+import com.xuggle.xuggler.ICodec;
+import com.xuggle.xuggler.IContainer;
+import com.xuggle.xuggler.IStream;
+import com.xuggle.xuggler.IStreamCoder;
+
+
 /**
  *
  * @author Mark
@@ -61,6 +70,59 @@ public class Main extends SimpleFileVisitor<Path> {
         return CONTINUE;
     }
 
+    public static long DetermineVideoLength(IContainer container) {
+        // query for the total duration
+        long duration = container.getDuration();
+        /*
+         TODO find out what unit this returns
+         (not found in documentation http://www.xuggle.com/public/documentation/java/api/ Icontainer-> methods -> getDuration)
+         eg seconds, milliseconds, etc...
+         assumes seconds
+         */
+        if (duration > 0)
+        return duration;
+        else {
+            throw new Exception("No duration data found for " + fileName);
+        }
+    }
+
+    public static boolean NeedToReencode(String file) {
+        IContainer container= IContainer.make();
+        int result = container.open(file, IContainer.Type.READ, null);
+
+        // check if the operation was successful
+        if (result<0)
+            throw new RuntimeException("Failed to open media file");
+        // TODO add exception handling for getting the duration in the main try catch block
+        long duration = DetermineVideoLength(container);
+        // This currently assumes DetermineVideoLength returns in seconds
+        // Converts to minutes
+        duration = duration / 60;
+        int numThirtyMin = 0;
+        while (duration >= 30) {
+            numThirtyMin++;
+            duration = duration - 30;
+        }
+        long fileSize = container.getFileSize();
+        if (fileSize < 0) {
+            //Shouldn't happen, but don't exactly know what kind of error to throw...
+            throw new Exception("Error getting filesize");
+        }
+        //Convert fileSize to MB
+        fileSize = fileSize / (1024*1024);
+        int numHalfGig = 0;
+        while (fileSize >= 512) {
+            numHalfGig++;
+            fileSize -= 512;
+        }
+        if (numHalfGig > numThirtyMin) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
     /**
      * @param args the command line arguments
      */
@@ -70,6 +132,13 @@ public class Main extends SimpleFileVisitor<Path> {
         try {
             // TODO code application logic here
             Files.walkFileTree(Paths.get("d:\\Videos"), main); //@todo make command line parameter
+            //TODO Make list of files found, change loop parameters after
+            String DummyFileName = "";
+            for (int i = 0; i < 1000; i*=2) { // for each video file found
+                if (NeedToReencode(DummyFileName)) {
+                    //TODO Reencode file
+                }
+            }
         } catch (IOException ex) {
             logger.error("Critical Error {}", ex);
         }
