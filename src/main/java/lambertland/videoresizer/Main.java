@@ -12,6 +12,7 @@ import com.xuggle.xuggler.IContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import static java.nio.file.FileVisitResult.CONTINUE;
@@ -145,9 +146,8 @@ public class Main extends SimpleFileVisitor<Path> {
             // TODO code application logic here
             Files.walkFileTree(Paths.get("\\\\master-htpc\\Videos\\Video"), main); //@todo make command line parameter
             //TODO Make list of files found, change loop parameters after
-            String DummyFileName = "";
-            for (int i = 0; i < 1000; i*=2) { // for each video file found
-                if (NeedToReencode(DummyFileName)) {
+            for (String filename : Files) { // for each video file found
+                if (NeedToReencode(filename)) {
                     //TODO Reencode file
                 }
             }
