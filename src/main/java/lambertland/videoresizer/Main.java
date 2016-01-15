@@ -6,6 +6,9 @@
 package lambertland.videoresizer;
 
 // Only ever import slf4j Logging APIs
+import com.xuggle.mediatool.IMediaReader;
+import com.xuggle.mediatool.ToolFactory;
+import com.xuggle.xuggler.IContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +26,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 //TODO add to dependency list
 
 import com.xuggle.xuggler.ICodec;
-import com.xuggle.xuggler.IContainer;
 import com.xuggle.xuggler.IStream;
 import com.xuggle.xuggler.IStreamCoder;
 
@@ -41,13 +43,22 @@ public class Main extends SimpleFileVisitor<Path> {
     public FileVisitResult visitFile(Path file,
                                    BasicFileAttributes attr) {
         if (attr.isSymbolicLink()) {
-            logger.info("Symbolic link: {} ", file);
+            logger.info("Symbolic link: {} ({} bytes)", file, attr.size());
         } else if (attr.isRegularFile()) {
-            logger.info("Regular file: {} ", file);
+            IContainer video = IContainer.make();
+            long length;
+            int result = video.open(file.toString(), IContainer.Type.READ,null);
+            if(result < 0){
+                length = -1;
+            } else {
+                length = video.getDuration()/60;
+            }
+
+            logger.info("Regular file: {} ({} bytes) {} minutes", file, attr.size(),length);
+
         } else {
-            logger.info("Other: {} ", file);
+            logger.info("Other: {} ({} bytes)", file, attr.size());
         }
-        logger.info("(" + attr.size() + "bytes)");
         return CONTINUE;
     }
 
@@ -132,7 +143,7 @@ public class Main extends SimpleFileVisitor<Path> {
         Main main = new Main();
         try {
             // TODO code application logic here
-            Files.walkFileTree(Paths.get("d:\\Videos"), main); //@todo make command line parameter
+            Files.walkFileTree(Paths.get("\\\\master-htpc\\Videos\\Video"), main); //@todo make command line parameter
             //TODO Make list of files found, change loop parameters after
             String DummyFileName = "";
             for (int i = 0; i < 1000; i*=2) { // for each video file found
