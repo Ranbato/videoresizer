@@ -6,13 +6,10 @@
 package lambertland.videoresizer;
 
 // Only ever import slf4j Logging APIs
-import com.xuggle.mediatool.IMediaReader;
-import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.xuggler.IContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import static java.nio.file.FileVisitResult.CONTINUE;
@@ -25,10 +22,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 // Video file reader library
 //TODO add to dependency list
-
-import com.xuggle.xuggler.ICodec;
-import com.xuggle.xuggler.IStream;
-import com.xuggle.xuggler.IStreamCoder;
 
 
 /**
@@ -46,6 +39,9 @@ public class Main extends SimpleFileVisitor<Path> {
         if (attr.isSymbolicLink()) {
             logger.info("Symbolic link: {} ({} bytes)", file, attr.size());
         } else if (attr.isRegularFile()) {
+            //@todo add a parameter list of file extensions to parse and filter with
+
+//            @todo this is duplicated in needToReEncode
             IContainer video = IContainer.make();
             long length;
             int result = video.open(file.toString(), IContainer.Type.READ,null);
@@ -56,6 +52,15 @@ public class Main extends SimpleFileVisitor<Path> {
             }
 
             logger.info("Regular file: {} ({} bytes) {} minutes", file, attr.size(),length);
+            //TODO Make list of files found, change loop parameters after
+            try {
+                if (needToReEncode(file)) {
+                    //TODO Reencode file
+                }
+            } catch (Exception e) {
+                logger.warn("Unexpected exception getting file information {}",e);
+            }
+
 
         } else {
             logger.info("Other: {} ({} bytes)", file, attr.size());
@@ -83,7 +88,7 @@ public class Main extends SimpleFileVisitor<Path> {
         return CONTINUE;
     }
 
-    public static long DetermineVideoLength(IContainer container) {
+    public static long determineVideoLength(IContainer container) throws Exception {
         // query for the total duration
         long duration = container.getDuration();
         /*
@@ -95,20 +100,20 @@ public class Main extends SimpleFileVisitor<Path> {
         if (duration > 0)
         return duration;
         else {
-            throw new Exception("No duration data found for " + fileName);
+            throw new Exception("No duration data found for " + container.toString());
         }
     }
 
-    public static boolean NeedToReencode(String file) {
+    public static boolean needToReEncode(Path file) throws Exception {
         IContainer container= IContainer.make();
-        int result = container.open(file, IContainer.Type.READ, null);
+        int result = container.open(file.toString(), IContainer.Type.READ, null);
 
         // check if the operation was successful
         if (result<0)
             throw new RuntimeException("Failed to open media file");
         // TODO add exception handling for getting the duration in the main try catch block
-        long duration = DetermineVideoLength(container);
-        // This currently assumes DetermineVideoLength returns in seconds
+        long duration = determineVideoLength(container);
+        // This currently assumes determineVideoLength returns in seconds
         // Converts to minutes
         duration = duration / 60;
         int numThirtyMin = 0;
@@ -145,12 +150,6 @@ public class Main extends SimpleFileVisitor<Path> {
         try {
             // TODO code application logic here
             Files.walkFileTree(Paths.get("\\\\master-htpc\\Videos\\Video"), main); //@todo make command line parameter
-            //TODO Make list of files found, change loop parameters after
-            for (String filename : Files) { // for each video file found
-                if (NeedToReencode(filename)) {
-                    //TODO Reencode file
-                }
-            }
         } catch (IOException ex) {
             logger.error("Critical Error {}", ex);
         }

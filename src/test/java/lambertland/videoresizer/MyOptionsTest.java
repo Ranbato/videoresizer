@@ -1,11 +1,16 @@
 package lambertland.videoresizer;
 
+import org.apache.commons.cli.Options;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.Assertion;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.contrib.java.lang.system.SystemErrRule;
 import org.junit.contrib.java.lang.system.SystemOutRule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Properties;
 
 import static org.junit.Assert.*;
 
@@ -13,6 +18,8 @@ import static org.junit.Assert.*;
  * Created by Ranbato on 1/18/2016.
  */
 public class MyOptionsTest {
+
+    static private Logger logger = LoggerFactory.getLogger(MyOptionsTest.class);
 
     @Rule
     public final SystemErrRule systemErrRule = new SystemErrRule().enableLog();
@@ -24,11 +31,12 @@ public class MyOptionsTest {
     @Test
     public void testParseOptionsHelp() throws Exception {
 
-        final String output = normalizeString("usage: videoresizer [-b <handbrake-path>] [-h] [-l <logfile>] [-p\n" +
-                "       <search-path>] [-s <size>]\n" +
+        final String output = normalizeString("usage: videoresizer [-b <handbrake-path>] [-e <extensions>] [-h] [-l\n" +
+                "       <logfile>] [-p <search-path>] [-s <size>]\n" +
                 "Resize video files using lower quality h.254\n" +
                 "\n" +
                 " -b,--handbrake-path <handbrake-path>   Location of Handbrake\n" +
+                " -e,--extensions <extensions>           List of extensions to process\n" +
                 " -h,--help                              Shows this help\n" +
                 " -l,--logfile <logfile>                 use given file for log\n" +
                 " -p,--search-path <search-path>         Path to search for videos\n" +
@@ -42,6 +50,18 @@ public class MyOptionsTest {
         // run the test
         options.parseOptions(new String[]{"-h"});
 
+
+    }
+
+    @Test
+    public void testParseOptionsDefaultProperties() throws Exception {
+
+
+        MyOptions options = new MyOptions();
+        // run the test
+        Properties results = options.parseOptions(new String[]{});
+
+        logger.debug("Default Properties:\n{}",results);
 
     }
 

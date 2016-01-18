@@ -69,6 +69,11 @@ public class MyOptions {
                 .hasArg()
                 .desc("Path to search for videos")
                 .build();
+        Option extensions = Option.builder("e").argName("extensions")
+                .longOpt("extensions")
+                .hasArgs()
+                .desc("List of extensions to process")
+                .build();
         Option help = Option.builder( "h")
                 .longOpt("help")
                 .desc("Shows this help" )
@@ -79,6 +84,7 @@ public class MyOptions {
         options.addOption(handbrake);
         options.addOption(sizeperhour);
         options.addOption(searchPath);
+        options.addOption(extensions);
         options.addOption(help);
 
         return options;
